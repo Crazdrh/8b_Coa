@@ -28,7 +28,7 @@ We will train on a combination of **C4 (Colossal Cleaned Common Crawl, English s
 The `preprocess_dataset.py` script downloads (streams) the datasets, tokenizes the text, and writes out fixed-length sequences of tokens (2048 tokens each) to binary files. By default, it also sets aside a small fraction of data as a validation set for perplexity evaluation.
 
 **Steps:**
-1. **Set Up Tokenizer:** We use OpenAI's `tiktoken` implementation of the GPT-2 BPE tokenizer. The vocabulary size is expanded to **200,000 tokens** for training (to accommodate diverse text). In our code, we use the GPT-2 encoding as a base. The special end-of-text token `<|endoftext|>` is used to separate documents.
-2. **Run Preprocessing:** Launch the script:
+1. **Set Up Tokenizer:** We use OpenAI's `tiktoken` implementation of the o200k_base BPE tokenizer. The vocabulary size is expanded to **200,000 tokens** for training (to accommodate diverse text). In our code, we use the o200k_base encoding as a base.
+3. **Run Preprocessing:** Launch the script:
    ```bash
    python preprocess_dataset.py --output_dir data/ --val_fraction 0.001 --seed 0
