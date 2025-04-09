@@ -52,5 +52,4 @@ if __name__ == "__main__":
 output_path = "/mnt/data/train_embedding.py"
 with open(output_path, "w") as f:
     f.write(train_embedding_code)
-
 output_path
