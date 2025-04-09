@@ -37,7 +37,7 @@ def train():
     dataset = WordDataset("preprocessed/train_pairs.npy", vocab_size)
     dataloader = DataLoader(dataset, batch_size=2048, shuffle=True, num_workers=4)
 
-    for epoch in range(10):  # Continue for 10 more epochs
+    for epoch in range(20):
         for i, (center, pos, negs) in enumerate(dataloader):
             center = center.to(model_engine.device)
             pos = pos.to(model_engine.device)
