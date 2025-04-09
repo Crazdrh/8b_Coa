@@ -1,30 +1,44 @@
 import os
-import requests
+from huggingface_hub import hf_hub_download
 
-DATA_DIR = r"E:/Data"
+DATA_DIR = "path"  # change if desired
 DATASETS_DIR = os.path.join(DATA_DIR, "datasets")
+
 os.makedirs(DATASETS_DIR, exist_ok=True)
+def download_hf_file(repo_id, filename, subfolder=None, repo_type="dataset", revision="main"):
+    print(f"Downloading {filename} from {repo_id} ...")
+    local_file = hf_hub_download(
+        repo_id=repo_id,
+        filename=filename,
+        repo_type=repo_type,
+        revision=revision
+    )
+    # Move the downloaded file from your cache to E:/Data/datasets/<subfolder>/filename
+    out_dir = DATASETS_DIR
+    if subfolder:
+        out_dir = os.path.join(DATASETS_DIR, subfolder)
+        os.makedirs(out_dir, exist_ok=True)
 
-def download_file(url, out_path):
-    print(f"Downloading from {url} to {out_path} ...")
-    # Disable certificate verification here:
-    response = requests.get(url, stream=True, verify=False)  
-    response.raise_for_status()
-    with open(out_path, "wb") as f:
-        for chunk in response.iter_content(chunk_size=8192):
-            if chunk:
-                f.write(chunk)
+    out_path = os.path.join(out_dir, os.path.basename(filename))
+    if not os.path.exists(out_path):
+        os.rename(local_file, out_path)
 
-# === Dataset 1: The Pile (Subset for demo) ===
-PILE_URL = "https://the-eye.eu/public/AI/pile_preliminary_components/wiki.tar.gz"
-download_file(PILE_URL, os.path.join(DATASETS_DIR, "wiki.tar.gz"))
+    print(f"Saved to: {out_path}")
+    return out_path
 
-# === Dataset 2: OpenWebText2 ===
-OWT2_URL = "https://the-eye.eu/public/AI/pile_preliminary_components/openwebtext2.tar.gz"
-download_file(OWT2_URL, os.path.join(DATASETS_DIR, "openwebtext2.tar.gz"))
+python_file = "data/python.json.gz"
+download_hf_file(
+    repo_id="bigcode/the-stack",
+    filename=python_file,
+    subfolder="the_stack_v1/python",
+    revision="main"
+)
+owt2_file = "openwebtext2-raw.gz"
+download_hf_file(
+    repo_id="openwebtext2",
+    filename=owt2_file,
+    subfolder="openwebtext2",
+    revision="main"
+)
 
-# === Dataset 3: LAION2B-en captions subset ===
-LAION_URL = "https://huggingface.co/datasets/laion/laion2B-en/resolve/main/laion2B-en.tsv.gz"
-download_file(LAION_URL, os.path.join(DATASETS_DIR, "laion2B-en.tsv.gz"))
-
-print("✅ Downloads completed (with verify=False).")
+print("✅ All downloads completed.")
