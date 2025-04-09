@@ -1,19 +1,22 @@
 import torch
 import numpy as np
 from model import Word2VecNegSampling
+import tiktoken 
+from sklearn.metrics.pairwise import cosine_similarity
 
 with open("preprocessed/meta.txt") as f:
     vocab_size = int(f.readline())
 
-model = Word2VecNegSampling(vocab_size, 300)
+enc = tiktoken.get_encoding("o200k_base") 
+
+model = Word2VecNegSampling(vocab_size, 600)
 model.load_state_dict(torch.load("embedding_model.pth"))
 model.eval()
 
-# Cosine similarity search
 embedding_weights = model.center_emb.weight.data.cpu().numpy()
-query = embedding_weights[ enc.encode("king")[0] ]
+query_token = enc.encode("king")[0] 
+query = embedding_weights[query_token]
 
-from sklearn.metrics.pairwise import cosine_similarity
 sims = cosine_similarity([query], embedding_weights)[0]
 topk = sims.argsort()[-10:][::-1]
 
