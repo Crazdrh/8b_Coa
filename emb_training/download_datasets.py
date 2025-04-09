@@ -7,13 +7,9 @@ os.makedirs(DATASETS_DIR, exist_ok=True)
 
 def download_file(url, out_path):
     print(f"Downloading from {url} to {out_path} ...")
-
-    # Make an HTTP GET request
-    response = requests.get(url, stream=True)
-    # Raise an error if the download fails
+    # Disable certificate verification here:
+    response = requests.get(url, stream=True, verify=False)  
     response.raise_for_status()
-
-    # Write the file to disk in chunks
     with open(out_path, "wb") as f:
         for chunk in response.iter_content(chunk_size=8192):
             if chunk:
@@ -31,4 +27,4 @@ download_file(OWT2_URL, os.path.join(DATASETS_DIR, "openwebtext2.tar.gz"))
 LAION_URL = "https://huggingface.co/datasets/laion/laion2B-en/resolve/main/laion2B-en.tsv.gz"
 download_file(LAION_URL, os.path.join(DATASETS_DIR, "laion2B-en.tsv.gz"))
 
-print("✅ Downloads completed.")
+print("✅ Downloads completed (with verify=False).")
