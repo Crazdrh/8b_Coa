@@ -1,44 +1,66 @@
+#!/usr/bin/env python3
+
 import os
-from huggingface_hub import hf_hub_download
+import subprocess
+import urllib.request
+import gzip
 
-DATA_DIR = "path"  # change if desired
-DATASETS_DIR = os.path.join(DATA_DIR, "datasets")
+BASE_DIR = "/home/hayden/8b_LLM/8b_Coa/tokenized_data/"
+os.makedirs(BASE_DIR, exist_ok=True)
+crawl_ids = [
+    "CC-MAIN-2023-06",
+    "CC-MAIN-2025-13",
+    "CC-MAIN-2025-08",
+    "CC-MAIN-2025-05"
+]
 
-os.makedirs(DATASETS_DIR, exist_ok=True)
-def download_hf_file(repo_id, filename, subfolder=None, repo_type="dataset", revision="main"):
-    print(f"Downloading {filename} from {repo_id} ...")
-    local_file = hf_hub_download(
-        repo_id=repo_id,
-        filename=filename,
-        repo_type=repo_type,
-        revision=revision
-    )
-    # Move the downloaded file from your cache to E:/Data/datasets/<subfolder>/filename
-    out_dir = DATASETS_DIR
-    if subfolder:
-        out_dir = os.path.join(DATASETS_DIR, subfolder)
-        os.makedirs(out_dir, exist_ok=True)
+def download_wet_files_for_crawl(crawl_id):
 
-    out_path = os.path.join(out_dir, os.path.basename(filename))
-    if not os.path.exists(out_path):
-        os.rename(local_file, out_path)
+    wet_paths_url = f"https://data.commoncrawl.org/crawl-data/{crawl_id}/wet.paths.gz"
+    
+    print(f"Downloading WET paths from {wet_paths_url} ...")
+    
+    local_wet_paths_gz = os.path.join(BASE_DIR, f"{crawl_id}-wet.paths.gz")
+    local_wet_paths = os.path.join(BASE_DIR, f"{crawl_id}-wet.paths")
 
-    print(f"Saved to: {out_path}")
-    return out_path
+    urllib.request.urlretrieve(wet_paths_url, local_wet_paths_gz)
 
-python_file = "data/python.json.gz"
-download_hf_file(
-    repo_id="bigcode/the-stack",
-    filename=python_file,
-    subfolder="the_stack_v1/python",
-    revision="main"
-)
-owt2_file = "openwebtext2-raw.gz"
-download_hf_file(
-    repo_id="openwebtext2",
-    filename=owt2_file,
-    subfolder="openwebtext2",
-    revision="main"
-)
+    with gzip.open(local_wet_paths_gz, 'rb') as f_in:
+        with open(local_wet_paths, 'wb') as f_out:
+            f_out.write(f_in.read())
 
-print("✅ All downloads completed.")
+    os.remove(local_wet_paths_gz)
+    
+    print(f"Extracted paths file to {local_wet_paths}")
+
+    crawl_dir = os.path.join(BASE_DIR, crawl_id)
+    os.makedirs(crawl_dir, exist_ok=True)
+
+    with open(local_wet_paths, 'r') as f:
+        wet_files = [line.strip() for line in f if line.strip()]
+
+    print(f"Starting download of {len(wet_files)} WET files for {crawl_id}.")
+
+    for i, wet_file_path in enumerate(wet_files, 1):
+        wet_file_url = f"https://data.commoncrawl.org/{wet_file_path}"
+
+        cmd = [
+            "wget",
+            "-c",
+            "-q",
+            "-P", crawl_dir,
+            wet_file_url
+        ]
+        if i % 50 == 0:
+            print(f"  Downloaded {i} / {len(wet_files)} from {crawl_id} ...")
+        
+        subprocess.run(cmd, check=True)
+
+    print(f"Finished downloading WET files for {crawl_id}.\n")
+
+def main():
+    for crawl_id in crawl_ids:
+        download_wet_files_for_crawl(crawl_id)
+
+if __name__ == "__main__":
+    main()
