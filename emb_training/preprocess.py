@@ -82,7 +82,6 @@ def save_pairs(pairs, source_name):
 if __name__ == "__main__":
     # Example: adjust these to your actual data
     sources = {
-        "the_stack_v1_python": "E:/Data/datasets/the_stack_v1/python.json.gz",
         "owt2": "E:/Data/datasets/openwebtext2.tar.gz"
     }
 
@@ -107,8 +106,6 @@ if __name__ == "__main__":
 
     multi_files = {
         "readme.txt": "This is a readme for the multi-dataset project.\n",
-        # Add more entries if needed:
-        # "example_script.py": "print('Hello from script!')",
     }
     multi_data_dir = "/mnt/data"  # change if desired
     os.makedirs(multi_data_dir, exist_ok=True)
